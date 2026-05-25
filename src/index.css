@@ -71,7 +71,7 @@ body {
   }
 
   .floating-nav {
-    @apply rounded-lg border bg-black;
+    @apply rounded-2xl border border-white/15 bg-white/10 shadow-lg shadow-black/10 backdrop-blur-xl;
   }
 
   .absolute-center {
@@ -163,6 +163,53 @@ body {
 
   .contact-clip-path-2 {
     clip-path: polygon(29% 15%, 85% 30%, 50% 100%, 10% 64%);
+  }
+}
+
+/* Premium smooth scrollbar */
+html {
+  /* Thin scrollbar in Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(87,36,255,0.9) rgba(0,0,0,0.08);
+}
+
+/* WebKit/Chromium */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.08));
+  border-radius: 9999px;
+  margin: 10px 0;
+  box-shadow: inset 0 6px 18px rgba(0,0,0,0.45);
+  padding: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7c3aed 0%, #06b6d4 100%);
+  border-radius: 9999px;
+  border: 3px solid rgba(255,255,255,0.06);
+  padding: 2px;
+  backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: 0 14px 40px rgba(6,182,212,0.16), inset 0 -6px 18px rgba(0,0,0,0.32);
+  transition: transform 200ms cubic-bezier(.2,.9,.25,1), box-shadow 200ms ease, background 260ms ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  transform: translateZ(0) scale(1.03);
+  box-shadow: 0 20px 60px rgba(6,182,212,0.22), inset 0 -6px 22px rgba(0,0,0,0.45);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar {
+    transition: none !important;
   }
 }
 

@@ -1,10 +1,9 @@
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
-import { FaGithub } from "react-icons/fa";
 import { TiLocationArrow } from "react-icons/ti";
 import { useWindowScroll } from "react-use";
 
-import { LINKS, NAV_ITEMS } from "@/constants";
+import { NAV_ITEMS } from "@/constants";
 import { cn } from "@/lib/utils";
 
 import { Button } from "./button";
@@ -15,10 +14,12 @@ export const Navbar = () => {
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isIndicatorActive, setIsIndicatorActive] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [isNavVisible, setIsNavVisible] = useState(false);
+
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   const { y: currentScrollY } = useWindowScroll();
+  const isScrolled = currentScrollY > 0;
 
   const toggleAudioIndicator = () => {
     setIsAudioPlaying((prevAudioPlaying) => !prevAudioPlaying);
@@ -31,33 +32,63 @@ export const Navbar = () => {
   }, [isAudioPlaying]);
 
   useEffect(() => {
-    if (currentScrollY === 0) {
-      setIsNavVisible(true);
-      navContainerRef.current?.classList.remove("floating-nav");
-    } else if (currentScrollY > lastScrollY) {
-      setIsNavVisible(false);
-      navContainerRef.current?.classList.add("floating-nav");
-    } else if (currentScrollY < lastScrollY) {
-      setIsNavVisible(true);
-      navContainerRef.current?.classList.add("floating-nav");
-    }
+    if (isScrolled) navContainerRef.current?.classList.add("floating-nav");
+    else navContainerRef.current?.classList.remove("floating-nav");
 
-    setLastScrollY(currentScrollY);
-  }, [currentScrollY, lastScrollY]);
-
-  useEffect(() => {
     gsap.to(navContainerRef.current, {
-      y: isNavVisible ? 0 : -100,
-      opacity: isNavVisible ? 1 : 0,
+      y: 0,
+      opacity: 1,
       duration: 0.2,
     });
-  }, [isNavVisible]);
+
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (currentScrollY / max) * 100 : 0;
+    const pctFixed = Number(pct.toFixed(2));
+    setScrollProgress(pctFixed);
+
+    if (progressRef.current) {
+      // laggy width tween
+      gsap.to(progressRef.current, {
+        width: `${pctFixed}%`,
+        duration: 0.6,
+        ease: "power3.out",
+      });
+
+      // subtle pulse when progress updates
+      gsap.fromTo(
+        progressRef.current,
+        { boxShadow: "0 0 0 rgba(0,0,0,0)" },
+        {
+          boxShadow: "0 10px 30px rgba(79,183,221,0.12)",
+          duration: 0.35,
+          yoyo: true,
+          repeat: 1,
+          ease: "power1.inOut",
+          delay: 0.02,
+        }
+      );
+    }
+  }, [currentScrollY, isScrolled]);
 
   return (
     <header
       ref={navContainerRef}
-      className="fixed inset-x-0 top-4 z-50 h-16 border-none transition-all duration-700 sm:inset-x-6"
+      className={cn(
+        "fixed inset-x-0 top-4 z-50 h-16 transition-all duration-700 sm:inset-x-6",
+        isScrolled
+          ? "floating-nav border-white/15 bg-white/12 backdrop-saturate-150"
+          : "border border-transparent bg-transparent shadow-none backdrop-blur-0 backdrop-saturate-100"
+      )}
     >
+      <div className="absolute left-0 top-0 h-2 w-full pointer-events-none">
+        <div
+          aria-hidden
+          className="h-full rounded-r-full bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] transition-all duration-150 ease-linear"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
       <div className="absolute top-1/2 w-full -translate-y-1/2">
         <nav className="flex size-full items-center justify-between p-4">
           <div className="flex items-center gap-7">
@@ -103,6 +134,7 @@ export const Navbar = () => {
                       <div
                         key={i + 1}
                         className={cn(
+                
                           "indicator-line",
                           isIndicatorActive && "active"
                         )}
@@ -112,15 +144,7 @@ export const Navbar = () => {
                   })}
               </button>
 
-              <a
-                href={LINKS.sourceCode}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="transition hover:opacity-75"
-                title="Source Code"
-              >
-                <FaGithub className="size-5 text-white" />
-              </a>
+              {/* Source code icon removed as requested */}
             </div>
           </div>
         </nav>
