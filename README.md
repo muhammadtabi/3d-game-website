@@ -73,6 +73,7 @@ game-website/
   |- eslint.config.js
   |- index.html
   |- netlify.toml
+  |- package-lock.json
   |- package.json
   |- postcss.config.mjs
   |- tsconfig.app.json
